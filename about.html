@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About - Погода</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="mstyle.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Quicksand&amp;display=swap"
+    />
+    <link
+      rel="shortcut icon"
+      href="./assets/icons/favicon.svg"
+      type="image/x-icon"
+    />
+    <script src="./js/icon.js" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <header>
+      <a href="https://www.voenmeh.ru/" class="logo">
+        <i class="fal fa-sun fa-3x"></i>
+        <h4>&nbsp;Погода</h4>
+      </a>
+
+      <div class="navMain">
+        <button class="openbtn" onclick="openNav()">&#9776;</button>
+      </div>
+
+      <div class="nav">
+        <div id="mySidepanel" class="sidebar">
+          <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"
+            >&times;
+          </a>
+          <ul>
+            <li>
+              <a href="index.html">Главная</a>
+              <a class="active" href="about.html">Информация</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <div class="contain">
+      <div class="intro">
+        <p>
+          Доброго времени суток,<br />
+          Данная работа была сделана студентом БГТУ "Военмех" <br />
+          Палёновым Александром Александровичем И508Б10. <br />
+          Всем котиков :0 <br />
+        </p>
+        <a href="https://www.voenmeh.ru/" target="_blank">
+          <i class="fab fa-github fa-2x"></i>
+          <h2>&nbsp;Военмех</h2>
+        </a>
+      </div>
+    </div>
+
+    <footer class="footerA">
+      <p>&#169; Работа по Практике Палёнова Александра И508Б</p>
+    </footer>
+
+    <div class="abgimg">
+      <img src="assets/about.jpg" alt="weather-img" scroll="no" />
+    </div>
+
+    <script src="./js/nav.js"></script>
+  </body>
+</html>

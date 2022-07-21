@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="Ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Погода</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="mstyle.css" />
+    <!-- <link rel="shortcut icon" href="./assets/favo.png" type="image/x-icon" /> -->
+    <link
+      rel="shortcut icon"
+      id="favicon"
+      href="./assets/icons/favicon.svg"
+      type="image/x-icon"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Quicksand&amp;display=swap"
+    />
+    <script src="./js/icon.js" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <header>
+      <a href="https://www.voenmeh.ru/" class="logo">
+        <i class="fal fa-sun fa-3x"></i>
+        <!-- <i class="fal fa-cloud-sun-rain fa-3x"></i> -->
+        <h4>&nbsp;Погода</h4>
+      </a>
+
+      <div class="navMain">
+        <button class="openbtn" onclick="openNav()">&#9776;</button>
+      </div>
+
+      <div class="nav">
+        <div id="mySidepanel" class="sidebar">
+          <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"
+            >&times;
+          </a>
+          <ul>
+            <li>
+              <a class="active" href="index.html">Главная</a>
+              <a href="about.html">Информация</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <div class="alert">ALERT</div>
+
+    <div class="search">
+      <input
+        type="text"
+        placeholder="Впишите город"
+        onfocus="this.placeholder = ''"
+        onblur="this.placeholder = 'Впишите город'"
+        value=""
+      />
+
+      <button class="geoloc" onclick="getLocation()">
+        <i class="far fa-location"></i>
+      </button>
+    </div>
+
+    <div class="data">
+      <h2 class="location">Название города</h2>
+      <div class="deg">
+        <button>&deg;C</button>
+      </div>
+      <div class="weatherIcon">
+        <img src="./assets/icons/unknown.png" alt="Unknown icon" />
+      </div>
+      <div class="tempValue">
+        <p>- &deg; C</p>
+      </div>
+      <div class="tempDesc">
+        <p class="descMain">Описание</p>
+        <p class="descSub">Описание</p>
+      </div>
+    </div>
+
+    <div class="moreData">
+      <div class="sec1">
+        <i class="lon fal fa-arrows-v fa-2x"> <p> Долгота</p></i>
+        <i class="sunUp fal fa-sunrise fa-2x"> <p> Восход</p></i>
+        <i class="minTemp fal fa-temperature-down fa-2x"> <p> МинТемпература</p></i>
+        <i class="press fal fa-tachometer-alt fa-2x"> <p> Давление</p></i>
+        <i class="windSpd fal fa-kite fa-2x"> <p> СкоростьВетра</p></i>
+      </div>
+      <div class="sec2">
+        <i class="lat fal fa-arrows-h fa-2x"> <p> Широта</p></i>
+        <i class="sunDown fal fa-sunset fa-2x"> <p> Закат</p></i>
+        <i class="maxTemp fal fa-temperature-up fa-2x"> <p> МаксТемпература</p></i>
+        <i class="humid far fa-humidity fa-2x"> <p> Влажность</p></i>
+        <i class="windDir far fa-compass fa-2x"> <p> Направление</p></i>
+      </div>
+
+      <!-- <div class="coord">
+        <i class="lon fal fa-arrows-v"> Долгота</i>
+        <i class="lat fal fa-arrows-h"> Широта</i>
+      </div>
+      <div class="sun">
+        <i class="sunUp fal fa-sunrise"> Восход</i>
+        <i class="sunDown fal fa-sunset"> Закат</i>
+      </div>
+      <div class="tempInfo">
+        <i class="minTemp fal fa-temperature-down"> МинТемпература</i>
+        <i class="maxTemp fal fa-temperature-up"> МаксТемпература</i>
+      </div>
+      <div class="weathInfo">
+        <i class="press fal fa-tachometer-alt"> Давление</i>
+        <i class="humid far fa-humidity"> Влажность</i>
+      </div>
+      <div class="wind">
+        <i class="windSpd fal fa-kite"> СкоростьВетра</i>
+        <i class="windDir far fa-compass"> Направление</i>
+      </div> -->
+    </div>
+
+    <footer>
+      <p>&#169; Работа по Практике Палёнова Александра И508Б</p>
+    </footer>
+
+    <div class="bgimg">
+      <img src="assets/unknown.jpg" alt="weather-img" scroll="no" />
+    </div>
+
+    <div class="mbgimg">
+      <img src="assets/mobile/unknown.jpg" alt="weather-mimg" scroll="no" />
+    </div>
+
+    <!-- <script src="./OLD/OLDapp.js"></script> -->
+    <script src="./js/app.js"></script>
+    <script src="./js/nav.js"></script>
+  </body>
+</html>
