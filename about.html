@@ -46,239 +46,86 @@
     <div class="contain">
       <div class="intro">
         <p>
-          #include <stdlib.h> <br />
-#include <stdio.h><br />
-#include <stdlib.h><br />
-#include <string.h><br />
-#include <windows.h><br />
-struct person<br />
-{<br />
-       char name[30];<br />
-       char importer[30];<br />
-       int volume;<br />
-};<br />
+          #include <iostream><br />
+#include <cstdlib><br />
+#include <cmath><br />
+#include <cassert> // assert<br />
+using namespace std;<br />
 <br />
-void add (char*);   /* добавить запись в файл */<br />
-void edit (char*);  /* редактировать запись */<br />
-void show (char*);  /* просмотреть содержимое файла */<br />
-void search1 (char*);    /* найти самого старшего работника среди мужчин */<br />
-void search2 (char*);  /*вывести список молодых специалистов до 28 лет с высшим образованием*/<br />
-void del (char*);       /* удалить запись из файла */<br />
-void printing (FILE *, int);<br />
+// Особое значение "бесконечное количество корней".<br />
+const int INFINITE_ROOTS = -1;<br />
 <br />
-int main (int argc, char* argv[])<br />
+const double // Вспомогательные числовые константы<br />
+  HALF_PI   = 1.5707963267949,  // половина пи<br />
+  PI        = 3.14159265358979, // число пи<br />
+  DOUBLE_PI = 6.2831853071796,  // два пи<br />
+  TOLERANCE = 1e-10; // граница между "нулём" и "ненулём"<br />
+<br />
+// Логарифм по произвольному основанию.<br />
+double log(double base, double arg)<br />
 {<br />
-    SetConsoleCP(1251);<br />
-	SetConsoleOutputCP(1251);<br />
-    char filename[80]; /*определение имени файла*/<br />
-    if (argc > 1)<br />
-        strcpy (filename, argv[1]);<br />
-    else<br />
-    {<br />
-        puts("Введите имя файла для обработки");<br />
-        gets(filename);<br />
-    }<br />
-    int menu;<br />
-    do<br />
-    {<br />
-       system ("CLS");<br />
-       puts ("1. Добавление записи");<br />
-       puts ("2. Редактирование записи");<br />
-       puts ("3. Просмотр записей");<br />
-       puts ("4. Удаление записи");<br />
-       puts ("5. Вывод страны и объема по товару");<br />
-       puts ("6. Выход");<br />
-       scanf ("%d%*c", &menu);<br />
-       switch (menu)<br />
-       {<br />
-              case 1 : add (filename); break;<br />
-              case 2 : edit (filename); break;<br />
-              case 3 : show (filename); break;<br />
-              case 4 : del (filename); break;<br />
-              case 5 : search1 (filename); break;<br />
-       }<br />
-    }<br />
-    while (menu!=6);<br />
-    return 0;<br />
+  return log(arg) / log(base);<br />
 }<br />
 <br />
-/*заполнение одной записи (ввод данных о клиенте)*/<br />
-struct person input_client (void)<br />
+// Проверка значения на близость нулю.<br />
+bool is_almost_zero(double x, double tolerance = TOLERANCE)<br />
 {<br />
-     struct person employee;<br />
-     int temp;<br />
-     puts ("Наименование");<br />
-     gets (employee.name);<br />
-     puts("Страна-импортер");<br />
-     gets( employee.importer);<br />
-     puts("Объем");<br />
-     scanf("%d", &temp);<br />
-     employee.volume = temp;<br />
-     getchar();<br />
-     return employee;<br />
+  return abs(x) <= tolerance;<br />
+}<br />
+
+// Левая часть уравнения.<br />
+double f(double a, double b, double c, double x)<br />
+{<br />
+  return 1.0 + sin(pow(a, x) + abs(log(b, c)));<br />
 }<br />
 <br />
-/* функция добавления записи в файл */<br />
-void add (char* file)<br />
+// Решаем уравнение f(a, b, c, root) = 0 относительно root.<br />
+// Функция возвращает "количество корней",<br />
+// один корень записывает по ссылке.<br />
+int solve_f(double a, double b, double c, double &root)<br />
 {<br />
-     FILE * f;<br />
-     struct person employee;<br />
-     system ("CLS");<br />
-     if ((f=fopen (file, "ab"))==NULL)<br />
-     {<br />
-          perror ("Ошибка открытия файла");<br />
-          getchar();<br />
-          return;<br />
-     }<br />
-     employee = input_client();<br />
-     fwrite (&employee, sizeof (employee), 1, f);<br />
-     fclose (f);<br />
-}<br />
+  if (a < 0.0 || b <= 0.0 || b == 1.0 || c <= 0.0)<br />
+    return 0; // нет корней<br />
+  if (a == 0.0 || a == 1.0) // потенциально почти все возможные x -- корни<br />
+    return is_almost_zero(f(a, b, c, 1.0))? INFINITE_ROOTS: 0;<br />
 <br />
-/* функция вывода на экран одной записи */<br />
-void print1 (struct person data)<br />
-{<br />
-    printf ("Наименование : %s\nСтрана-импортер : %s\nОбъем : %d",
-            data.name, data.importer, data.volume);<br />
-}<br />
-<br />
-/* функция редактирования записи */<br />
-void edit (char* file)<br />
-{<br />
-     FILE * f;<br />
-     struct person employee;<br />
-     char name[30],yes;<br />
-     system ("CLS");<br />
-     if ((f=fopen (file, "rb+"))==NULL)<br />
-     {<br />
-          perror ("Ошибка открытия файла"); getchar();<br />
-          return;<br />
-     }<br />
-     printf ("Наименование: "); gets (name);<br />
-     while (fread(&employee,sizeof(employee), 1, f))<br />
-        if (!strcmp(employee.name,name))<br />
-        {<br />
-             print1 (employee);<br />
-             puts ("\nРедактировать? (y/n)");<br />
-             do<br />
-             {<br />
-                  yes = getchar(); getchar();<br />
-             }<br />
-             while (yes!='y' && yes!='Y' && yes!='n' && yes!='N');<br />
-             if (yes=='y' || yes=='Y')<br />
-             {<br />
-                  employee = input_client();<br />
-                  fseek (f,-sizeof(employee),SEEK_CUR);<br />
-                  fwrite (&employee, sizeof (employee), 1, f);<br />
-                  fseek (f,0,SEEK_CUR);<br />
-             }<br />
-        }<br />
-     puts ("Поиск завершен"); getchar();<br />
-     fclose(f);<br />
-}<br />
-<br />
-/* функция печати содержимого файла */<br />
-void show (char* file)<br />
-{<br />
-     FILE * f;<br />
-     int menu, menu2;<br />
-     struct person employee;<br />
-     int k=0;<br />
-     system ("CLS");<br />
-     if ((f=fopen (file, "rb"))==NULL)<br />
-     {<br />
-          perror ("Ошибка открытия файла");<br />
-          getchar();<br />
-          return;<br />
-     }<br />
-    puts ("|  N |             Наименование              |      Страна-Импортер      |   Объем   |");<br />
-    puts ("--------------------------------------------------------------------------------------");<br />
-    while(fread(&employee, sizeof(employee), 1, f)==1)<br />
-     {<br />
-                printf ("|%3d | %-37.30s |%-26s |%-8d   |\n",<br />
-                ++k, employee.name, employee.importer, employee.volume);<br />
-                puts ("--------------------------------------------------------------------------------------");<br />
-                }<br />
-    fclose(f);<br />
-    getchar(); getchar();<br />
+  // Счётное число корней, получим один из них.<br />
+  const double<br />
+    expr_part = abs(log(b, c)) + HALF_PI,  // часть выражения<br />
+    n = 1.0 + ceil(expr_part / DOUBLE_PI), // номер корня<br />
+    log_arg = DOUBLE_PI * n - expr_part;   // аргумент логарифма в формуле корня<br />
+
+  assert(log_arg > 0.0); // всегда должен быть положительным по построению<br />
+  root = log(a, log_arg);<br />
+  return 1;<br />
 }<br />
 <br />
 
-/* функция удаления записи из файла */<br />
-void del (char* file)<br />
+int main()<br />
 {<br />
+  cout << "Solving f(a, b, c, x) = 0, enter a, b, c:\n";<br />
+  cout.precision(16);<br />
+  for (double a, b, c, x; cin >> a >> b >> c;)<br />
+  {<br />
+    switch (solve_f(a, b, c, x))<br />
+    {<br />
+    case 0:<br />
+      cout << "no roots\n";<br />
+      break;<br />
+    case INFINITE_ROOTS:<br />
+      cout << "any number is a root\n";<br />
+      break;<br />
+    case 1: // один корень, записан в x<br />
+      cout << "x == " << x << ", error is " << f(a, b, c, x) << endl;<br />
+      break;<br />
+    default:<br />
+      assert(!"impossible case: invalid roots quantity"); // невозможный случай<br />
+      cout << "unknown error\n";<br />
+      return EXIT_FAILURE;<br />
+    }<br />
+  }<br />
 
-    FILE *f1, *f2;<br />
-    unsigned int n, n_file, i = 0;<br />
-    struct person employee;<br />
-    system ("CLS");<br />
-    if ((f1=fopen (file, "rb"))==NULL)<br />
-    {<br />
-        perror ("Ошибка открытия файла"); getchar();<br />
-        return;<br />
-    }<br />
-    fseek (f1, 0, SEEK_END);<br />
-    n_file = ftell(f1) / sizeof (employee);<br />
-    if (n_file == 0)<br />
-    {<br />
-        puts ("Файл пуст"); getchar();<br />
-        return;<br />
-    }<br />
-    puts ("Номер удаляемой записи?");<br />
-    scanf ("%u", &n);<br />
-    if ( n > n_file )<br />
-    {<br />
-        puts ("Некорректный номер");<br />
-        getchar();getchar();<br />
-        fclose (f1);<br />
-        return;<br />
-    }<br />
-    rewind (f1);<br />
-    if ((f2=fopen ("temp.dat", "wb"))==NULL)<br />
-    {<br />
-        perror ("Ошибка открытия файла");<br />
-        getchar();<br />
-        return;<br />
-    }<br />
-    while ( fread(&employee, sizeof(employee), 1, f1)==1 )<br />
-    {<br />
-        i++;<br />
-        if ( i != n )<br />
-            fwrite(&employee, sizeof(employee), 1, f2);<br />
-    }<br />
-    fclose (f1);<br />
-    fclose (f2);<br />
-    remove (file);<br />
-    rename ("temp.dat", file);<br />
-    puts ("Запись удалена");<br />
-    getchar();getchar();<br />
-}<br />
-<br />
-
-/* функция поиска по товару */<br />
-void search1 (char* file)<br />
-{<br />
-     FILE * f;<br />
-     struct person employee, required;<br />
-     char req[30];<br />
-     int max_age = 3000, age;<br />
-     system ("CLS");<br />
-     if ((f=fopen (file, "rb"))==NULL)<br />
-     {<br />
-          perror ("Ошибка открытия файла"); getchar();<br />
-          return;<br />
-     }<br />
-     puts ("Введите искомый товар : ");<br />
-     gets(req);<br />
-     while (fread(&employee, sizeof(employee), 1, f)==1)<br />
-        if (!strcmp(employee.name,req))<br />
-        {<br />
-            printf("\n");<br />
-            print1 (employee);<br />
-            printf("\n");<br />
-        }<br />
-     fclose(f);<br />
-     getchar();getchar();<br />
+  return EXIT_SUCCESS;<br />
 }<br />
         </p>
         <a href="https://www.voenmeh.ru/" target="_blank">
