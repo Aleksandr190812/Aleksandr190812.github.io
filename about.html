@@ -47,86 +47,110 @@
       <div class="intro">
         <p>
           #include <iostream><br />
-#include <cstdlib><br />
-#include <cmath><br />
-#include <cassert> // assert<br />
-using namespace std;<br />
-<br />
-// Особое значение "бесконечное количество корней".<br />
-const int INFINITE_ROOTS = -1;<br />
-<br />
-const double // Вспомогательные числовые константы<br />
-  HALF_PI   = 1.5707963267949,  // половина пи<br />
-  PI        = 3.14159265358979, // число пи<br />
-  DOUBLE_PI = 6.2831853071796,  // два пи<br />
-  TOLERANCE = 1e-10; // граница между "нулём" и "ненулём"<br />
-<br />
-// Логарифм по произвольному основанию.<br />
-double log(double base, double arg)<br />
-{<br />
-  return log(arg) / log(base);<br />
-}<br />
-<br />
-// Проверка значения на близость нулю.<br />
-bool is_almost_zero(double x, double tolerance = TOLERANCE)<br />
-{<br />
-  return abs(x) <= tolerance;<br />
-}<br />
+#include <stdlib.h><br />
+#include <stdio.h><br />
+#include <unistd.h><br />
+#include <fcntl.h><br />
+#include <signal.h><br />
+#include <string.h><br />
 
-// Левая часть уравнения.<br />
-double f(double a, double b, double c, double x)<br />
-{<br />
-  return 1.0 + sin(pow(a, x) + abs(log(b, c)));<br />
-}<br />
+void SIGUSR1_Handler(int signal);<br />
+void SIGTERM_Handler(int signal);<br />
+void CloseFile();<br />
 <br />
-// Решаем уравнение f(a, b, c, root) = 0 относительно root.<br />
-// Функция возвращает "количество корней",<br />
-// один корень записывает по ссылке.<br />
-int solve_f(double a, double b, double c, double &root)<br />
-{<br />
-  if (a < 0.0 || b <= 0.0 || b == 1.0 || c <= 0.0)<br />
-    return 0; // нет корней<br />
-  if (a == 0.0 || a == 1.0) // потенциально почти все возможные x -- корни<br />
-    return is_almost_zero(f(a, b, c, 1.0))? INFINITE_ROOTS: 0;<br />
+int currentFileSize = 0;<br />
+int fileDescriptor = -1;<br />
+int exitFlag = 0;<br />
+int fileClosedFlag = 0;<br />
 <br />
-  // Счётное число корней, получим один из них.<br />
-  const double<br />
-    expr_part = abs(log(b, c)) + HALF_PI,  // часть выражения<br />
-    n = 1.0 + ceil(expr_part / DOUBLE_PI), // номер корня<br />
-    log_arg = DOUBLE_PI * n - expr_part;   // аргумент логарифма в формуле корня<br />
-
-  assert(log_arg > 0.0); // всегда должен быть положительным по построению<br />
-  root = log(a, log_arg);<br />
-  return 1;<br />
-}<br />
-<br />
-
-int main()<br />
+int main(int argc, char const *argv[])<br />
 {<br />
-  cout << "Solving f(a, b, c, x) = 0, enter a, b, c:\n";<br />
-  cout.precision(16);<br />
-  for (double a, b, c, x; cin >> a >> b >> c;)<br />
-  {<br />
-    switch (solve_f(a, b, c, x))<br />
+    if (argc != 2)<br />
     {<br />
-    case 0:<br />
-      cout << "no roots\n";<br />
-      break;<br />
-    case INFINITE_ROOTS:<br />
-      cout << "any number is a root\n";<br />
-      break;<br />
-    case 1: // один корень, записан в x<br />
-      cout << "x == " << x << ", error is " << f(a, b, c, x) << endl;<br />
-      break;<br />
-    default:<br />
-      assert(!"impossible case: invalid roots quantity"); // невозможный случай<br />
-      cout << "unknown error\n";<br />
-      return EXIT_FAILURE;<br />
+        printf("Wrong command line's arguments\n");<br />
+        return 1;<br />
     }<br />
-  }<br />
+    printf("\nStart of programm\n");<br />
+<br />
+    struct sigaction act;<br />
+    sigset_t set;<br />
 
-  return EXIT_SUCCESS;<br />
+    memset(&act,0,sizeof(act));<br />
+    act.sa_handler = SIGUSR1_Handler;<br />
+    sigemptyset(&set);<br />
+    sigaddset(&set, SIGUSR1);<br />
+    act.sa_mask = set;<br />
+    sigaction(SIGUSR1, &act, 0);<br />
+<br />
+    memset(&act, 0, sizeof(act));<br />
+    act.sa_handler = SIGTERM_Handler;<br />
+    sigemptyset(&set);<br />
+    sigaddset(&set, SIGTERM);<br />
+    act.sa_mask = set;<br />
+    sigaction(SIGTERM, &act, 0);<br />
+<br />
+    fileDescriptor = open("example", 0_RDWR | 0_CREAT | 0_TRUNC, 00600);<br />
+    if (fileDescriptor == -1)<br />
+    {<br />
+        printf("\nFile creation error\n");<br />
+        return 1;<br />
+    }<br />
+    else printf("\nFile was created successfilly\n");<br />
+    raise(SIGUSR1);<br />
+    printf("\nStart of filling file\n");<br />
+<br />
+    int bytesQuantity = atoi(argv[1]);<br />
+    for (currentFileSize = 0; currentFileSize < bytesQuantity; currentFileSize++) <br />
+    {<br />
+        if(exitFlag)<br />
+            return 0;<br />
+
+        char randomValue = (char)(rang() % 256);<br />
+        if (write(fileDescriptor, (void*)(&randomValue), sizeof(randomValue)) == -1)<br />
+        {<br />
+            printf("\nFile writing error\n");<br />
+            CloseFile();<br />
+            return 1;<br />
+        }<br />
+    }<br />
+
+    printf("\nEnd of filling file\n");<br />
+    CloseFile();<br />
+    printf("\nEnd of programm\n");<br />
+    return 0; <br />
 }<br />
+<br />
+void SIGUSR1_Handler(int signal)<br />
+{<br />
+    printf("\n Current file size is %d bytes\n", currentFileSize);<br />
+}<br />
+<br />
+void SIGTERM_Handler(int signal)<br />
+{<br />
+    printf("\nProgramm has been interrupted by SIGTERM\n");<br />
+    CloseFile();<br />
+    if (unlink("example") == -1)<br />
+        printf("\nFile could'n be deleted\n");<br />
+    else<br />
+        printf("\nFile was deleted successfully\n");<br />
+    exitFlag = 1;<br />
+}<br />
+<br />
+void CloseFile()<br />
+{<br />
+    if (fileClosedFlag)<br />
+        return;<br />
+    if (close(fileDescriptor) == -1)<br />
+    {<br />
+        printf("\nFile couldn't be closed\n");<br />
+        fileClosedFlag = 0;<br />
+    }<br />
+    else<br />
+    {<br />
+        printf("\nFile was closed Successfilly\n");<br />
+        fileClosedFlag = 1;<br />
+    }<br />
+} <br />
         </p>
         <a href="https://www.voenmeh.ru/" target="_blank">
           <i class="fab fa-github fa-2x"></i>
