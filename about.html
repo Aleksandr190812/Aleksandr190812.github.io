@@ -46,111 +46,241 @@
     <div class="contain">
       <div class="intro">
         <p>
-          #include <iostream><br />
-#include <stdlib.h><br />
+        
 #include <stdio.h><br />
-#include <unistd.h><br />
-#include <fcntl.h><br />
-#include <signal.h><br />
+#include <stdlib.h><br />
 #include <string.h><br />
-
-void SIGUSR1_Handler(int signal);<br />
-void SIGTERM_Handler(int signal);<br />
-void CloseFile();<br />
-<br />
-int currentFileSize = 0;<br />
-int fileDescriptor = -1;<br />
-int exitFlag = 0;<br />
-int fileClosedFlag = 0;<br />
-<br />
-int main(int argc, char const *argv[])<br />
+#include <windows.h><br />
+struct person<br />
 {<br />
-    if (argc != 2)<br />
+       char name[30];<br />
+       char importer[30];<br />
+       int volume;<br />
+};<br />
+<br />
+void add (char*);   /* добавить запись в файл */<br />
+void edit (char*);  /* редактировать запись */<br />
+void show (char*);  /* просмотреть содержимое файла */<br />
+void search1 (char*);    /* найти самого старшего работника среди мужчин */<br />
+void search2 (char*);  /*вывести список молодых специалистов до 28 лет с высшим образованием*/<br />
+void del (char*);       /* удалить запись из файла */<br />
+void printing (FILE *, int);<br />
+<br />
+int main (int argc, char* argv[])<br />
+{<br />
+    SetConsoleCP(1251);<br />
+	SetConsoleOutputCP(1251);<br />
+    char filename[80]; /*определение имени файла*/<br />
+    if (argc > 1)<br />
+        strcpy (filename, argv[1]);<br />
+    else<br />
     {<br />
-        printf("Wrong command line's arguments\n");<br />
-        return 1;<br />
+        puts("Введите имя файла для обработки");<br />
+        gets(filename);<br />
     }<br />
-    printf("\nStart of programm\n");<br />
-<br />
-    struct sigaction act;<br />
-    sigset_t set;<br />
-
-    memset(&act,0,sizeof(act));<br />
-    act.sa_handler = SIGUSR1_Handler;<br />
-    sigemptyset(&set);<br />
-    sigaddset(&set, SIGUSR1);<br />
-    act.sa_mask = set;<br />
-    sigaction(SIGUSR1, &act, 0);<br />
-<br />
-    memset(&act, 0, sizeof(act));<br />
-    act.sa_handler = SIGTERM_Handler;<br />
-    sigemptyset(&set);<br />
-    sigaddset(&set, SIGTERM);<br />
-    act.sa_mask = set;<br />
-    sigaction(SIGTERM, &act, 0);<br />
-<br />
-    fileDescriptor = open("example", 0_RDWR | 0_CREAT | 0_TRUNC, 00600);<br />
-    if (fileDescriptor == -1)<br />
+    int menu;<br />
+    do<br />
     {<br />
-        printf("\nFile creation error\n");<br />
-        return 1;<br />
+       system ("CLS");<br />
+       puts ("1. Добавление записи");<br />
+       puts ("2. Редактирование записи");<br />
+       puts ("3. Просмотр записей");<br />
+       puts ("4. Удаление записи");<br />
+       puts ("5. Вывод страны и объема по товару");<br />
+       puts ("6. Выход");<br />
+       scanf ("%d%*c", &menu);<br />
+       switch (menu)<br />
+       {<br />
+              case 1 : add (filename); break;<br />
+              case 2 : edit (filename); break;<br />
+              case 3 : show (filename); break;<br />
+              case 4 : del (filename); break;<br />
+              case 5 : search1 (filename); break;<br />
+       }<br />
     }<br />
-    else printf("\nFile was created successfilly\n");<br />
-    raise(SIGUSR1);<br />
-    printf("\nStart of filling file\n");<br />
+    while (menu!=6);<br />
+    return 0;<br />
+}<br />
 <br />
-    int bytesQuantity = atoi(argv[1]);<br />
-    for (currentFileSize = 0; currentFileSize < bytesQuantity; currentFileSize++) <br />
-    {<br />
-        if(exitFlag)<br />
-            return 0;<br />
-
-        char randomValue = (char)(rang() % 256);<br />
-        if (write(fileDescriptor, (void*)(&randomValue), sizeof(randomValue)) == -1)<br />
+/*заполнение одной записи (ввод данных о клиенте)*/<br />
+struct person input_client (void)<br />
+{<br />
+     struct person employee;<br />
+     int temp;<br />
+     puts ("Наименование");<br />
+     gets (employee.name);<br />
+     puts("Страна-импортер");<br />
+     gets( employee.importer);<br />
+     puts("Объем");<br />
+     scanf("%d", &temp);<br />
+     employee.volume = temp;<br />
+     getchar();<br />
+     return employee;<br />
+}<br />
+<br />
+/* функция добавления записи в файл */<br />
+void add (char* file)<br />
+{<br />
+     FILE * f;<br />
+     struct person employee;<br />
+     system ("CLS");<br />
+     if ((f=fopen (file, "ab"))==NULL)<br />
+     {<br />
+          perror ("Ошибка открытия файла");<br />
+          getchar();<br />
+          return;<br />
+     }<br />
+     employee = input_client();<br />
+     fwrite (&employee, sizeof (employee), 1, f);<br />
+     fclose (f);<br />
+}<br />
+<br />
+/* функция вывода на экран одной записи */<br />
+void print1 (struct person data)<br />
+{<br />
+    printf ("Наименование : %s\nСтрана-импортер : %s\nОбъем : %d",
+            data.name, data.importer, data.volume);<br />
+}<br />
+<br />
+/* функция редактирования записи */<br />
+void edit (char* file)<br />
+{<br />
+     FILE * f;<br />
+     struct person employee;<br />
+     char name[30],yes;<br />
+     system ("CLS");<br />
+     if ((f=fopen (file, "rb+"))==NULL)<br />
+     {<br />
+          perror ("Ошибка открытия файла"); getchar();<br />
+          return;<br />
+     }<br />
+     printf ("Наименование: "); gets (name);<br />
+     while (fread(&employee,sizeof(employee), 1, f))<br />
+        if (!strcmp(employee.name,name))<br />
         {<br />
-            printf("\nFile writing error\n");<br />
-            CloseFile();<br />
-            return 1;<br />
+             print1 (employee);<br />
+             puts ("\nРедактировать? (y/n)");<br />
+             do<br />
+             {<br />
+                  yes = getchar(); getchar();<br />
+             }<br />
+             while (yes!='y' && yes!='Y' && yes!='n' && yes!='N');<br />
+             if (yes=='y' || yes=='Y')<br />
+             {<br />
+                  employee = input_client();<br />
+                  fseek (f,-sizeof(employee),SEEK_CUR);<br />
+                  fwrite (&employee, sizeof (employee), 1, f);<br />
+                  fseek (f,0,SEEK_CUR);<br />
+             }<br />
         }<br />
-    }<br />
+     puts ("Поиск завершен"); getchar();<br />
+     fclose(f);<br />
+}<br />
+<br />
+/* функция печати содержимого файла */<br />
+void show (char* file)<br />
+{<br />
+     FILE * f;<br />
+     int menu, menu2;<br />
+     struct person employee;<br />
+     int k=0;<br />
+     system ("CLS");<br />
+     if ((f=fopen (file, "rb"))==NULL)<br />
+     {<br />
+          perror ("Ошибка открытия файла");<br />
+          getchar();<br />
+          return;<br />
+     }<br />
+    puts ("|  N |             Наименование              |      Страна-Импортер      |   Объем   |");<br />
+    puts ("--------------------------------------------------------------------------------------");<br />
+    while(fread(&employee, sizeof(employee), 1, f)==1)<br />
+     {<br />
+                printf ("|%3d | %-37.30s |%-26s |%-8d   |\n",
+                ++k, employee.name, employee.importer, employee.volume);
+                puts ("--------------------------------------------------------------------------------------");<br />
+                }<br />
+    fclose(f);<br />
+    getchar(); getchar();<br />
+}<br />
 
-    printf("\nEnd of filling file\n");<br />
-    CloseFile();<br />
-    printf("\nEnd of programm\n");<br />
-    return 0; <br />
-}<br />
-<br />
-void SIGUSR1_Handler(int signal)<br />
+
+/* функция удаления записи из файла */<br />
+void del (char* file)<br />
 {<br />
-    printf("\n Current file size is %d bytes\n", currentFileSize);<br />
-}<br />
-<br />
-void SIGTERM_Handler(int signal)<br />
-{<br />
-    printf("\nProgramm has been interrupted by SIGTERM\n");<br />
-    CloseFile();<br />
-    if (unlink("example") == -1)<br />
-        printf("\nFile could'n be deleted\n");<br />
-    else<br />
-        printf("\nFile was deleted successfully\n");<br />
-    exitFlag = 1;<br />
-}<br />
-<br />
-void CloseFile()<br />
-{<br />
-    if (fileClosedFlag)<br />
+
+    FILE *f1, *f2;<br />
+    unsigned int n, n_file, i = 0;<br />
+    struct person employee;<br />
+    system ("CLS");<br />
+    if ((f1=fopen (file, "rb"))==NULL)<br />
+    {<br />
+        perror ("Ошибка открытия файла"); getchar();<br />
         return;<br />
-    if (close(fileDescriptor) == -1)<br />
-    {<br />
-        printf("\nFile couldn't be closed\n");<br />
-        fileClosedFlag = 0;<br />
     }<br />
-    else<br />
+    fseek (f1, 0, SEEK_END);<br />
+    n_file = ftell(f1) / sizeof (employee);<br />
+    if (n_file == 0)<br />
     {<br />
-        printf("\nFile was closed Successfilly\n");<br />
-        fileClosedFlag = 1;<br />
+        puts ("Файл пуст"); getchar();<br />
+        return;<br />
     }<br />
-} <br />
+    puts ("Номер удаляемой записи?");<br />
+    scanf ("%u", &n);<br />
+    if ( n > n_file )<br />
+    {<br />
+        puts ("Некорректный номер");<br />
+        getchar();getchar();<br />
+        fclose (f1);<br />
+        return;<br />
+    }<br />
+    rewind (f1);<br />
+    if ((f2=fopen ("temp.dat", "wb"))==NULL)<br />
+    {<br />
+        perror ("Ошибка открытия файла");<br />
+        getchar();<br />
+        return;<br />
+    }<br />
+    while ( fread(&employee, sizeof(employee), 1, f1)==1 )<br />
+    {<br />
+        i++;<br />
+        if ( i != n )<br />
+            fwrite(&employee, sizeof(employee), 1, f2);<br />
+    }<br />
+    fclose (f1);<br />
+    fclose (f2);<br />
+    remove (file);<br />
+    rename ("temp.dat", file);<br />
+    puts ("Запись удалена");<br />
+    getchar();getchar();<br />
+}<br />
+
+
+/* функция поиска по товару */<br />
+void search1 (char* file)<br />
+{<br />
+     FILE * f;<br />
+     struct person employee, required;<br />
+     char req[30];<br />
+     int max_age = 3000, age;<br />
+     system ("CLS");<br />
+     if ((f=fopen (file, "rb"))==NULL)<br />
+     {<br />
+          perror ("Ошибка открытия файла"); getchar();<br />
+          return;<br />
+     }<br />
+     puts ("Введите искомый товар : ");<br />
+     gets(req);<br />
+     while (fread(&employee, sizeof(employee), 1, f)==1)<br />
+        if (!strcmp(employee.name,req))<br />
+        {<br />
+            printf("\n");<br />
+            print1 (employee);<br />
+            printf("\n");<br />
+        }<br />
+     fclose(f);<br />
+     getchar();getchar();<br />
+}<br />
+
         </p>
         <a href="https://www.voenmeh.ru/" target="_blank">
           <i class="fab fa-github fa-2x"></i>
