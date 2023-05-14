@@ -50,235 +50,323 @@
 #include <stdio.h><br />
 #include <stdlib.h><br />
 #include <string.h><br />
-#include <windows.h><br />
-struct person<br />
+#include <locale.h><br />
+
+struct car<br />
 {<br />
-       char name[30];<br />
-       char importer[30];<br />
-       int volume;<br />
+    int year; // Ð³Ð¾Ð´ Ð²Ñ‹Ð¿ÑƒÑÐºÐ°<br />
+    int price; // Ñ†ÐµÐ½Ð° Ð°Ð²Ñ‚Ð¾<br />
+    int quantity; // ÐºÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ Ð°Ð²Ñ‚Ð¾<br />
+    char brand[20]; // Ð¼Ð°Ñ€ÐºÐ° Ð°Ð²Ñ‚Ð¾<br />
+    char country[20]; // ÑÑ‚Ñ€Ð°Ð½Ð°-Ð¸Ð·Ð³Ð¾Ñ‚Ð¾Ð²Ð¸Ñ‚ÐµÐ»ÑŒ<br />
+    float engine_capacity; // Ð¾Ð±ÑŠÐµÐ¼ Ð´Ð²Ð¸Ð³Ð°Ñ‚ÐµÐ»Ñ<br />
+    float gasoline_consumption; // Ñ€Ð°ÑÑ…Ð¾Ð´ Ñ‚Ð¾Ð¿Ð»Ð¸Ð²Ð° Ð½Ð° 100 ÐºÐ¼<br />
 };<br />
 <br />
-void add (char*);   /* добавить запись в файл */<br />
-void edit (char*);  /* редактировать запись */<br />
-void show (char*);  /* просмотреть содержимое файла */<br />
-void search1 (char*);    /* найти самого старшего работника среди мужчин */<br />
-void search2 (char*);  /*вывести список молодых специалистов до 28 лет с высшим образованием*/<br />
-void del (char*);       /* удалить запись из файла */<br />
-void printing (FILE *, int);<br />
+struct car input_car (void);<br />
+
+void add (char *); // Ð´Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð·Ð°Ð¿Ð¸ÑÑŒ Ð² Ñ„Ð°Ð¹Ð»<br />
+void del (char *); // ÑƒÐ´Ð°Ð»Ð¸Ñ‚ÑŒ Ð·Ð°Ð¿Ð¸ÑÑŒ Ð¸Ð· Ñ„Ð°Ð¹Ð»Ð°<br />
+void edit (char *); // Ñ€ÐµÐ´Ð°ÐºÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ð·Ð°Ð¿Ð¸ÑÑŒ<br />
+void show (char *); // Ð¿Ñ€Ð¾ÑÐ¼Ð¾Ñ‚Ñ€ÐµÑ‚ÑŒ ÑÐ¾Ð´ÐµÑ€Ð¶Ð¸Ð¼Ð¾Ðµ Ñ„Ð°Ð¹Ð»Ð°<br />
+void change (char *); // Ð½Ð°Ð¹Ñ‚Ð¸ ÑÐ²ÐµÐ´ÐµÐ½Ð¸Ñ Ð¾ ÐºÐ»Ð¸ÐµÐ½Ñ‚Ðµ<br />
+void search (char * file);<br />
 <br />
-int main (int argc, char* argv[])<br />
+
+int main (int argc, char * argv[])<br />
 {<br />
-    SetConsoleCP(1251);<br />
-	SetConsoleOutputCP(1251);<br />
-    char filename[80]; /*определение имени файла*/<br />
+    int menu;<br />
+    char filename[100];<br />
+
     if (argc > 1)<br />
-        strcpy (filename, argv[1]);<br />
+        strcpy(filename, argv[1]);<br />
     else<br />
     {<br />
-        puts("Введите имя файла для обработки");<br />
+        printf("Enter file name : ");<br />
         gets(filename);<br />
     }<br />
-    int menu;<br />
+
     do<br />
     {<br />
-       system ("CLS");<br />
-       puts ("1. Добавление записи");<br />
-       puts ("2. Редактирование записи");<br />
-       puts ("3. Просмотр записей");<br />
-       puts ("4. Удаление записи");<br />
-       puts ("5. Вывод страны и объема по товару");<br />
-       puts ("6. Выход");<br />
-       scanf ("%d%*c", &menu);<br />
-       switch (menu)<br />
-       {<br />
-              case 1 : add (filename); break;<br />
-              case 2 : edit (filename); break;<br />
-              case 3 : show (filename); break;<br />
-              case 4 : del (filename); break;<br />
-              case 5 : search1 (filename); break;<br />
-       }<br />
+        puts("--------------------------------------------------------------------------------------------------");<br />
+        puts("|1.| Adding a record.                                                                            |");<br />
+        puts("|2.| Editing the record.                                                                         |");<br />
+        puts("|3.| Viewing records.                                                                            |");<br />
+        puts("|4.| Car price change.                                                                           |");<br />
+        puts("|5.| Searching for a car brand with a certain engine volume and the lowest gasoline consumption. |");<br />
+        puts("|6.| Delete a record.                                                                            |");<br />
+        puts("|7.| Exit.                                                                                       |");<br />
+        puts("--------------------------------------------------------------------------------------------------");<br />
+        printf("Select the number of operation : ");<br />
+        scanf("%d%*c", &menu);<br />
+
+        switch (menu)<br />
+        {<br />
+            case 1 : add (filename); break;<br />
+            case 2 : edit (filename); break;<br />
+            case 3 : show (filename); break;<br />
+            case 4 : change (filename); break;<br />
+            case 5 : search (filename); break;<br />
+            case 6 : del (filename); break;<br />
+        }<br />
     }<br />
-    while (menu!=6);<br />
+    while (menu != 7);<br />
     return 0;<br />
 }<br />
-<br />
-/*заполнение одной записи (ввод данных о клиенте)*/<br />
-struct person input_client (void)<br />
+
+struct car input_car (void)<br />
 {<br />
-     struct person employee;<br />
-     int temp;<br />
-     puts ("Наименование");<br />
-     gets (employee.name);<br />
-     puts("Страна-импортер");<br />
-     gets( employee.importer);<br />
-     puts("Объем");<br />
-     scanf("%d", &temp);<br />
-     employee.volume = temp;<br />
-     getchar();<br />
-     return employee;<br />
-}<br />
-<br />
-/* функция добавления записи в файл */<br />
-void add (char* file)<br />
-{<br />
-     FILE * f;<br />
-     struct person employee;<br />
-     system ("CLS");<br />
-     if ((f=fopen (file, "ab"))==NULL)<br />
-     {<br />
-          perror ("Ошибка открытия файла");<br />
-          getchar();<br />
-          return;<br />
-     }<br />
-     employee = input_client();<br />
-     fwrite (&employee, sizeof (employee), 1, f);<br />
-     fclose (f);<br />
-}<br />
-<br />
-/* функция вывода на экран одной записи */<br />
-void print1 (struct person data)<br />
-{<br />
-    printf ("Наименование : %s\nСтрана-импортер : %s\nОбъем : %d",
-            data.name, data.importer, data.volume);<br />
-}<br />
-<br />
-/* функция редактирования записи */<br />
-void edit (char* file)<br />
-{<br />
-     FILE * f;<br />
-     struct person employee;<br />
-     char name[30],yes;<br />
-     system ("CLS");<br />
-     if ((f=fopen (file, "rb+"))==NULL)<br />
-     {<br />
-          perror ("Ошибка открытия файла"); getchar();<br />
-          return;<br />
-     }<br />
-     printf ("Наименование: "); gets (name);<br />
-     while (fread(&employee,sizeof(employee), 1, f))<br />
-        if (!strcmp(employee.name,name))<br />
-        {<br />
-             print1 (employee);<br />
-             puts ("\nРедактировать? (y/n)");<br />
-             do<br />
-             {<br />
-                  yes = getchar(); getchar();<br />
-             }<br />
-             while (yes!='y' && yes!='Y' && yes!='n' && yes!='N');<br />
-             if (yes=='y' || yes=='Y')<br />
-             {<br />
-                  employee = input_client();<br />
-                  fseek (f,-sizeof(employee),SEEK_CUR);<br />
-                  fwrite (&employee, sizeof (employee), 1, f);<br />
-                  fseek (f,0,SEEK_CUR);<br />
-             }<br />
-        }<br />
-     puts ("Поиск завершен"); getchar();<br />
-     fclose(f);<br />
-}<br />
-<br />
-/* функция печати содержимого файла */<br />
-void show (char* file)<br />
-{<br />
-     FILE * f;<br />
-     int menu, menu2;<br />
-     struct person employee;<br />
-     int k=0;<br />
-     system ("CLS");<br />
-     if ((f=fopen (file, "rb"))==NULL)<br />
-     {<br />
-          perror ("Ошибка открытия файла");<br />
-          getchar();<br />
-          return;<br />
-     }<br />
-    puts ("|  N |             Наименование              |      Страна-Импортер      |   Объем   |");<br />
-    puts ("--------------------------------------------------------------------------------------");<br />
-    while(fread(&employee, sizeof(employee), 1, f)==1)<br />
-     {<br />
-                printf ("|%3d | %-37.30s |%-26s |%-8d   |\n",
-                ++k, employee.name, employee.importer, employee.volume);
-                puts ("--------------------------------------------------------------------------------------");<br />
-                }<br />
-    fclose(f);<br />
-    getchar(); getchar();<br />
+    struct car machine;<br />
+    printf("Next, you need to enter the machine data.\n");<br />
+    printf("-------------------------------------------\n");<br />
+    printf("Brand : ");<br />
+    scanf("%s", machine.brand);<br />
+    printf("Auto-producing country : ");<br />
+    scanf("%s", machine.country);<br />
+    printf("Year of car production : ");<br />
+    scanf("%d", &machine.year);<br />
+    printf("Engine capacity : ");<br />
+    scanf("%f", &machine.engine_capacity);<br />
+    printf("Fuel consumption per 100 km.: ");<br />
+    scanf("%f", &machine.gasoline_consumption);<br />
+    printf("Car price ($) : ");<br />
+    scanf("%d", &machine.price);<br />
+    printf("Quantity of cars instances : ");<br />
+    scanf("%d", &machine.quantity);<br />
+    printf("-------------------------------------------\n");<br />
+    return machine;<br />
 }<br />
 
-
-/* функция удаления записи из файла */<br />
-void del (char* file)<br />
+void add (char * file) // Ñ„ÑƒÐ½ÐºÑ†Ð¸Ñ Ð´Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ð¸Ñ Ð·Ð°Ð¿Ð¸ÑÐ¸ Ð² Ñ„Ð°Ð¹Ð»<br />
 {<br />
+    FILE * f;<br />
+    struct car machine;<br />
 
-    FILE *f1, *f2;<br />
-    unsigned int n, n_file, i = 0;<br />
-    struct person employee;<br />
-    system ("CLS");<br />
-    if ((f1=fopen (file, "rb"))==NULL)<br />
+    // Ð¾Ñ‡Ð¸ÑÑ‚ÐºÐ° ÐºÐ¾Ð½ÑÐ¾Ð»Ð¸ Ð´Ð¾Ð»Ð¶Ð½Ð° Ð±Ñ‹Ñ‚ÑŒ Ñ‚ÑƒÑ‚<br />
+    if ((f = fopen(file,"ab")) == NULL)<br />
     {<br />
-        perror ("Ошибка открытия файла"); getchar();<br />
-        return;<br />
-    }<br />
-    fseek (f1, 0, SEEK_END);<br />
-    n_file = ftell(f1) / sizeof (employee);<br />
-    if (n_file == 0)<br />
-    {<br />
-        puts ("Файл пуст"); getchar();<br />
-        return;<br />
-    }<br />
-    puts ("Номер удаляемой записи?");<br />
-    scanf ("%u", &n);<br />
-    if ( n > n_file )<br />
-    {<br />
-        puts ("Некорректный номер");<br />
-        getchar();getchar();<br />
-        fclose (f1);<br />
-        return;<br />
-    }<br />
-    rewind (f1);<br />
-    if ((f2=fopen ("temp.dat", "wb"))==NULL)<br />
-    {<br />
-        perror ("Ошибка открытия файла");<br />
+        perror("\nFile open error. Press 'Enter' to continue.\n");<br />
         getchar();<br />
         return;<br />
     }<br />
-    while ( fread(&employee, sizeof(employee), 1, f1)==1 )<br />
-    {<br />
-        i++;<br />
-        if ( i != n )<br />
-            fwrite(&employee, sizeof(employee), 1, f2);<br />
-    }<br />
-    fclose (f1);<br />
-    fclose (f2);<br />
-    remove (file);<br />
-    rename ("temp.dat", file);<br />
-    puts ("Запись удалена");<br />
-    getchar();getchar();<br />
+    machine = input_car();<br />
+    fwrite(&machine, sizeof(machine), 1, f);<br />
+    printf("The car was successfully added. Press 'Enter' to continue.\n");<br />
+    getchar();<br />
+    getchar();<br />
+    fclose(f);<br />
 }<br />
 
-
-/* функция поиска по товару */<br />
-void search1 (char* file)<br />
+void print (struct car data) // Ñ„ÑƒÐ½ÐºÑ†Ð¸Ñ Ð²Ñ‹Ð²Ð¾Ð´Ð° Ð½Ð° ÑÐºÑ€Ð°Ð½ Ð¾Ð´Ð½Ð¾Ð¹ Ð·Ð°Ð¿Ð¸ÑÐ¸<br />
 {<br />
-     FILE * f;<br />
-     struct person employee, required;<br />
-     char req[30];<br />
-     int max_age = 3000, age;<br />
-     system ("CLS");<br />
-     if ((f=fopen (file, "rb"))==NULL)<br />
-     {<br />
-          perror ("Ошибка открытия файла"); getchar();<br />
-          return;<br />
-     }<br />
-     puts ("Введите искомый товар : ");<br />
-     gets(req);<br />
-     while (fread(&employee, sizeof(employee), 1, f)==1)<br />
-        if (!strcmp(employee.name,req))<br />
+    printf("-------------------------------------------\n");<br />
+    printf("Brand : %s\nAuto-producing country : %s\nYear of car production : %d\nEngine capacity : %f\nFuel consumption per 100 km.: %f\nCar price ($): %d\nQuantity of cars instances : %d\n", data.brand, data.country, data.year, data.engine_capacity, data.gasoline_consumption, data.price, data.quantity);<br />
+    printf("-------------------------------------------\n");<br />
+}<br />
+
+void edit (char * file) // Ñ„ÑƒÐ½ÐºÑ†Ð¸Ñ Ñ€ÐµÐ´Ð°ÐºÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ñ Ð·Ð°Ð¿Ð¸ÑÐ¸<br />
+{<br />
+    FILE * f;<br />
+    struct car machine;<br />
+    char brand[20], yes;<br />
+
+    // Ð¾Ñ‡Ð¸ÑÑ‚ÐºÐ° ÐºÐ¾Ð½ÑÐ¾Ð»Ð¸ Ð´Ð¾Ð»Ð¶Ð½Ð° Ð±Ñ‹Ñ‚ÑŒ Ñ‚ÑƒÑ‚<br />
+    if ((f = fopen(file,"rb+")) == NULL)<br />
+    {<br />
+        perror("\nFile open error. Press 'Enter' to continue.\n");<br />
+        getchar();<br />
+        return;<br />
+    }<br />
+
+    printf("\nWrite the brand of the car whose data you want to edit : ");<br />
+    gets(brand);<br />
+
+    while (fread(&machine, sizeof(machine), 1, f))<br />
+        if (!strcmp(machine.brand, brand))<br />
         {<br />
-            printf("\n");<br />
-            print1 (employee);<br />
-            printf("\n");<br />
+            print(machine);<br />
+            printf("If you want to edit a record write 'y', otherwise write 'n'\n");<br />
+            do<br />
+            {<br />
+                yes = getchar();<br />
+                getchar();<br />
+            }<br />
+            while ((yes != 'y') && (yes != 'n'));<br />
+            if (yes == 'y')<br />
+            {<br />
+                machine = input_car();<br />
+                fseek(f, -sizeof(machine), SEEK_CUR);<br />
+                fwrite(&machine, sizeof(machine), 1, f);<br />
+                fseek (f, 0, SEEK_CUR);<br />
+            }<br />
         }<br />
-     fclose(f);<br />
-     getchar();getchar();<br />
+
+    printf("The editing is comlete. Press 'Enter' to continue.\n");<br />
+    fclose(f);<br />
+    getchar();<br />
+    getchar();<br />
+}<br />
+
+void show (char * file) // Ñ„ÑƒÐ½ÐºÑ†Ð¸Ñ Ð¿ÐµÑ‡Ð°Ñ‚Ð¸ ÑÐ¾Ð´ÐµÑ€Ð¶Ð¸Ð¼Ð¾Ð³Ð¾ Ñ„Ð°Ð¹Ð»Ð°<br />
+{<br />
+    FILE * f;<br />
+    int k = 0;<br />
+    struct car machine;<br />
+
+    // Ð¾Ñ‡Ð¸ÑÑ‚ÐºÐ° ÐºÐ¾Ð½ÑÐ¾Ð»Ð¸ Ð´Ð¾Ð»Ð¶Ð½Ð° Ð±Ñ‹Ñ‚ÑŒ Ñ‚ÑƒÑ‚<br />
+    if ((f = fopen(file,"rb")) == NULL)<br />
+    {<br />
+        perror ("\nFile open error. Press 'Enter' to continue.\n");<br />
+        getchar();<br />
+        return;<br />
+    }<br />
+    puts("\n---------------------------------------------------------------------------------------------------------------------------------------------");<br />
+    puts("| N |        Brand       |  Auto-producing country  | Year | Engine capacity | Fuel consump. per 100 km. |       Car price       | Quantity |");<br />
+    puts("---------------------------------------------------------------------------------------------------------------------------------------------");<br />
+    while (fread(&machine, sizeof(machine), 1, f) == 1)<br />
+        printf("| %d | %18s | %24s | %4d | %15f | %25f | %21d | %8d |\n", ++k, machine.brand, machine.country, machine.year, machine.engine_capacity, machine.gasoline_consumption, machine.price, machine.quantity );<br />
+    puts("---------------------------------------------------------------------------------------------------------------------------------------------");<br />
+    fclose(f);<br />
+    printf("Press 'Enter' to continue.\n");<br />
+    getchar();<br />
+}<br />
+
+void change (char * file) // Ñ„ÑƒÐ½ÐºÑ†Ð¸Ñ ÐºÐ¾Ñ€Ñ€ÐµÐºÑ†Ð¸Ð¸ Ð´Ð°Ð½Ð½Ñ‹Ñ… Ð¾ Ð¼Ð°ÑˆÐ¸Ð½Ðµ, Ð¿Ð¾ÑÐ»Ðµ Ð¸Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ñ Ñ†ÐµÐ½Ñ‹<br />
+{<br />
+    FILE * f;<br />
+    float new_price = 0;<br />
+    char yes, brand[100];<br />
+    struct car machine, automobile;<br />
+
+    // Ð¾Ñ‡Ð¸ÑÑ‚ÐºÐ° ÐºÐ¾Ð½ÑÐ¾Ð»Ð¸ Ð´Ð¾Ð»Ð¶Ð½Ð° Ð±Ñ‹Ñ‚ÑŒ Ñ‚ÑƒÑ‚<br />
+    if ((f = fopen(file,"rb+")) == NULL)<br />
+    {<br />
+        perror ("\nFile open error. Press 'Enter' to continue.\n");<br />
+        getchar();<br />
+        return;<br />
+    }<br />
+
+    printf("\nWrite the brand of the car whose data you want to edit : ");<br />
+    gets(brand);<br />
+
+    while (fread(&machine, sizeof(machine), 1, f))<br />
+        if (!strcmp(machine.brand, brand))<br />
+        {<br />
+            print(machine);<br />
+            printf("If you want to change the price write 'y', otherwise write 'n' : ");<br />
+            do<br />
+            {<br />
+                yes = getchar();<br />
+                getchar();<br />
+            }<br />
+            while ((yes != 'y') && (yes != 'n'));<br />
+            if (yes == 'y')<br />
+            {<br />
+                printf("Enter the new price : ");<br />
+                scanf("%f", &new_price);<br />
+                machine.price = new_price;<br />
+                automobile = machine;<br />
+                fseek(f, -sizeof(machine), SEEK_CUR);<br />
+                fwrite(&machine, sizeof(machine), 1, f);<br />
+                fseek (f, 0, SEEK_CUR);<br />
+                print(automobile);<br />
+            }<br />
+        }<br />
+    puts("The change is comlete. Press 'Enter' to continue.\n");<br />
+    fclose(f);<br />
+    getchar();<br />
+    getchar();<br />
+}<br />
+
+void search (char * file)<br />
+{<br />
+    FILE * f;<br />
+    float v = 0, min = 1000;<br />
+    struct car machine;<br />
+
+    // Ð¾Ñ‡Ð¸ÑÑ‚ÐºÐ° ÐºÐ¾Ð½ÑÐ¾Ð»Ð¸ Ð´Ð¾Ð»Ð¶Ð½Ð° Ð±Ñ‹Ñ‚ÑŒ Ñ‚ÑƒÑ‚<br />
+    if ((f = fopen(file,"rb")) == NULL)<br />
+    {<br />
+        perror ("\nFile open error. Press 'Enter' to continue.\n");<br />
+        getchar();<br />
+        return;<br />
+    }<br />
+
+    printf("Enter engine capacity : ");<br />
+    scanf("%f", &v);<br />
+
+    while(fread(&machine, sizeof(machine), 1, f) == 1)<br />
+        if((machine.engine_capacity == v) && (machine.gasoline_consumption < min))<br />
+        {<br />
+            min = machine.gasoline_consumption;<br />
+        }<br />
+    if(min != 1000)<br />
+    {<br />
+        printf("-------------------------------------------\n");<br />
+        printf("Brand : %s\nFuel consumption per 100 km.: %f\n", machine.brand, machine.gasoline_consumption);<br />
+        printf("-------------------------------------------\n");<br />
+    }<br />
+    else<br />
+        printf("The car with this engine capacity wasn't found. ");<br />
+    fclose (f);<br />
+    printf("Press 'Enter' to continue.\n");<br />
+    getchar();<br />
+    getchar();<br />
+}<br />
+
+void del (char * file) // Ñ„ÑƒÐ½ÐºÑ†Ð¸Ñ ÑƒÐ´Ð°Ð»ÐµÐ½Ð¸Ñ Ð·Ð°Ð¿Ð¸ÑÐ¸ Ð¸Ð· Ñ„Ð°Ð¹Ð»Ð°<br />
+{<br />
+    FILE *f1, *f2;<br />
+    struct car machine;<br />
+    unsigned long n, n_file, i = 0;<br />
+
+    // Ð¾Ñ‡Ð¸ÑÑ‚ÐºÐ° ÐºÐ¾Ð½ÑÐ¾Ð»Ð¸ Ð´Ð¾Ð»Ð¶Ð½Ð° Ð±Ñ‹Ñ‚ÑŒ Ñ‚ÑƒÑ‚<br />
+    if ((f1 = fopen(file, "rb+")) == NULL) {<br />
+        perror("\nFile open error. Press 'Enter' to continue.\n");<br />
+        getchar();<br />
+        return;<br />
+    }<br />
+
+    fseek(f1, 0, SEEK_END);<br />
+    n_file = ftell(f1) / sizeof(machine);<br />
+
+    if (n_file == 0) {<br />
+        puts("File is free. Press 'Enter' to continue\n");<br />
+        getchar();<br />
+        return;<br />
+    }<br />
+
+    puts("What's the number of the deleted record?");<br />
+    scanf("%lu", &n);<br />
+
+    if (n > n_file) {<br />
+        puts("Incorrect number. Press 'Enter' to continue.\n");<br />
+        getchar();<br />
+        getchar();<br />
+        fclose(f1);<br />
+        return;<br />
+    }<br />
+
+    rewind(f1);<br />
+    if ((f2 = fopen("4.txt", "wb+")) == NULL) {<br />
+        perror("File open error. Press 'Enter' to continue.\n");<br />
+        getchar();<br />
+        return;<br />
+    }<br />
+
+    while (fread(&machine, sizeof(machine), 1, f1) == 1) {<br />
+        i++;<br />
+        if (i != n)<br />
+            fwrite(&machine, sizeof(machine), 1, f2);<br />
+    }<br />
+
+    fclose(f1);<br />
+    fclose(f2);<br />
+    remove(file);<br />
+    rename("temp.txt", file);<br />
+    puts("Record deleted. Press 'Enter' to continue.\n");<br />
+    getchar();<br />
+    getchar();<br />
 }<br />
 
         </p>
